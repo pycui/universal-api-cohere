@@ -1,11 +1,11 @@
 import logging
 import os
-from openai import OpenAI
+import cohere
 
 class UniversalAPI:
     def __init__(self):
         self.cached_methods = {}
-        self.openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        self.cohere_client = cohere.Client(os.environ.get("COHERE_API_KEY"))
 
     def __getattr__(self, name):
         def method(*args, **kwargs):
@@ -16,17 +16,14 @@ class UniversalAPI:
                 return cached_method(*args, **kwargs)
 
             prompt = f"The user is asking for a method called {name} with arguments {args} and kwargs {kwargs}. Return the python code that implements this method. Only return the python code, without the ```python prefix and ``` sufix. Do not include example usage."
-            messages = [
-                {"role": "user", "content": prompt},
-            ]
             logging.info(f"Generating dynamic method called: {name}, with arguments {args} and kwargs {kwargs}")
-            response = self.openai_client.chat.completions.create(
-                model='gpt-4-turbo-preview',
-                messages=messages,
+            response = self.cohere_client.chat(
+                model='command-r-plus',
+                message=prompt,
                 max_tokens=256, # Adjust the number of tokens as needed
                 temperature=0,  # Adjust the creativity level
             )
-            llm_response = response.choices[0].message.content
+            llm_response = response.text
             logging.info(f"LLM response: {llm_response}")
             exec(llm_response)
             self.cached_methods[method_signature] = locals()[name]
