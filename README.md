@@ -4,6 +4,8 @@
 
 This is a non-serious library that can implement any functions on the fly using LLMs. To use it, simply call a function with a descriptive name and parameters, and it will be defined, implemented and called at runtime. Generated functions are cached so you don't pay for things that are already implemented.
 
+(Note: this repo is based on my repo at https://github.com/pycui/universal-api and adopted to Cohere API.)
+
 ## Usage
 
 ```python
